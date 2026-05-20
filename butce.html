@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>Gelişmiş Birikim ve Bütçe Programım</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f6f9;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+        .konteyner {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0px 8px 20px rgba(0,0,0,0.08);
+            width: 1200px;
+            position: relative;
+        }
+        
+        /* ÜST PANEL VE AYARLAR BUTONU */
+        .ust-baslik-alani {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        h2 { margin: 0; color: #2c3e50; }
+        h3 { border-bottom: 2px solid #e2e8f0; padding-bottom: 5px; margin-top: 20px; }
+        
+        /* BALON (POPUP) AYARLAR MENÜSÜ */
+        .ayarlar-kapsayici {
+            position: relative;
+        }
+        .btn-ayarlar {
+            background-color: #4a5568;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 6px;
+            border: none;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: background 0.2s;
+        }
+        .btn-ayarlar:hover { background-color: #2d3748; }
+        
+        .ayarlar-balonu {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: 45px;
+            background: white;
+            border: 1px solid #cbd5e1;
+            border-radius: 12px;
+            box-shadow: 0px 10px 25px rgba(0,0,0,0.15);
+            width: 650px;
+            padding: 20px;
+            z-index: 100;
+        }
+        .ayarlar-balonu.aktif {
+            display: block;
+            animation: acilisEfekti 0.2s ease-out;
+        }
+        @keyframes acilisEfekti {
+            from { transform: translateY(-10px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        .ay-secici-alani {
+            background: #ebeef2;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+        .ay-secici-sol {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .yedekleme-alani {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .ay-secici-alani label { margin-top: 0; font-weight: bold; color: #2c3e50; }
+        select, input {
+            padding: 8px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+        select { font-weight: bold; color: #2c3e50; cursor: pointer; }
+
+        /* Özet Göstergeleri */
+        .ozet-kartlari {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        .kart {
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        .kart-gelir { background-color: #e8f8f5; color: #117a65; }
+        .kart-gider { background-color: #fdedec; color: #78281f; }
+        .kart-kalan { background-color: #ebf5fb; color: #1f618d; }
+        .kart-birikim { background-color: #fef9e7; color: #7d6608; border: 1px solid #f4d03f; }
+        
+        /* Kategori Özet Alanları */
+        .kategori-panelleri {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .kategori-ozet {
+            background: #f8f9fa;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            border: 1px solid #e2e8f0;
+            max-height: 220px;
+            overflow-y: auto;
+        }
+        .ozet-baslik { font-weight: bold; margin-bottom: 8px; border-bottom: 1px dashed #cbd5e0; padding-bottom: 4px; }
+        .ozet-baslik.yesil { color: #27ae60; }
+        .ozet-baslik.kirmizi { color: #c0392b; }
+        .ozet-baslik.altin { color: #b7950b; }
+        .kat-satir { display: flex; justify-content: space-between; margin-bottom: 4px; padding: 2px 0; }
+        .kat-etiket { font-weight: bold; color: #4a5568; }
+        
+        /* ANA İZGARA */
+        .izgara {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 20px;
+        }
+        
+        .form-grubu {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+        .form-grubu-gelir { border-left: 4px solid #2ecc71; }
+        .form-grubu-gider { border-left: 4px solid #e74c3c; }
+        .form-grubu-birikim { border-left: 4px solid #f1c40f; }
+        
+        .baslik-gelir { color: #2ecc71; font-weight: bold; font-size: 16px; }
+        .baslik-gider { color: #e74c3c; font-weight: bold; font-size: 16px; }
+        .baslik-birikim { color: #f1c40f; font-weight: bold; font-size: 16px; }
+        
+        label { display: block; font-weight: bold; color: #34495e; margin-top: 10px; font-size: 13px; }
+        .form-grubu input, .form-grubu select { width: 100%; margin-top: 5px; }
+        
+        .onay-kutusu-alani {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 10px;
+            background: #fff3cd;
+            padding: 6px;
+            border-radius: 5px;
+            border: 1px solid #ffeeba;
+        }
+        .onay-kutusu-alani input { width: auto; margin-top: 0; cursor: pointer; }
+        .onay-kutusu-alani label { margin-top: 0; cursor: pointer; color: #856404; font-size: 12px; }
+
+        button {
+            padding: 10px;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .btn-yesil { background-color: #2ecc71; width: 100%; margin-top: 12px; }
+        .btn-kirmizi { background-color: #e74c3c; width: 100%; margin-top: 12px; }
+        .btn-sari { background-color: #f1c40f; color: #2c3e50; width: 100%; margin-top: 12px; }
+        .btn-gri { background-color: #95a5a6; font-size: 12px;}
+        .btn-mavi { background-color: #2980b9; font-size: 12px;}
+        .btn-mavi:hover { background-color: #1f618d; }
+        .btn-turuncu { background-color: #e67e22; font-size: 12px;}
+        .btn-turuncu:hover { background-color: #d35400; }
+        .btn-mor { background-color: #8e44ad; font-size: 12px;}
+        .btn-mor:hover { background-color: #7d3c98; }
+        
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th, td { padding: 8px; text-align: left; border-bottom: 1px solid #ddd; font-size: 13px; }
+        th { background-color: #f2f2f2; color: #333; }
+        
+        .gelir-tutar { color: #27ae60; font-weight: bold; }
+        .gider-tutar { color: #c0392b; font-weight: bold; }
+        .birikim-tutar { color: #b7950b; font-weight: bold; }
+        .kat-sutun { color: #718096; font-style: italic; font-size: 11px; }
+        
+        .btn-sil {
+            background: none;
+            border: none;
+            color: #e74c3c;
+            font-weight: bold;
+            cursor: pointer;
+            padding: 0px 5px;
+            margin: 0;
+            width: auto;
+            display: inline;
+        }
+
+        .kat-yonetim-izgara {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 15px;
+            margin-top: 10px;
+        }
+        .kat-ekle-grup {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 10px;
+        }
+        .kat-ekle-grup input { flex: 1; padding: 5px; font-size: 11px; }
+        .kat-ekle-grup button { padding: 5px 8px; font-size: 11px; }
+        .kat-liste-kutusu {
+            background: #f8f9fa;
+            padding: 8px;
+            border-radius: 6px;
+            border: 1px solid #e2e8f0;
+            max-height: 140px;
+            overflow-y: auto;
+        }
+
+        /* RAPOR MODAL */
+        .rapor-arkaplan {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        .rapor-pencere {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            width: 800px;
+            max-height: 85vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            animation: modalAcilis 0.2s ease-out;
+        }
+        @keyframes modalAcilis {
+            from { transform: scale(0.9); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+        .rapor-ust {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+        .rapor-kapat {
+            background: none; border: none; color: #888; font-size: 24px; cursor: pointer; padding: 0 5px;
+        }
+        .rapor-kapat:hover { color: #333; }
+    </style>
+</head>
+<body>
+
+    <div class="konteyner">
+        
+        <!-- ÜST BAŞLIK VE AYARLAR -->
+        <div class="ust-baslik-alani">
+            <h2>Yatırım Takipli Kişisel Bütçe</h2>
+            
+            <div class="ayarlar-kapsayici" id="ayarlarKapsayici">
+                <button class="btn-ayarlar" onclick="ayarlariAcKapat(event)">⚙️ Kategorileri Yönet</button>
+                
+                <!-- BALON PANEL -->
+                <div class="ayarlar-balonu" id="ayarlarBalonu">
+                    <strong style="color: #1e293b; font-size: 14px; display:block; border-bottom:1px solid #e2e8f1; padding-bottom:5px;">⚙️ Kategori ve Varlık Yönetimi</strong>
+                    <div class="kat-yonetim-izgara">
+                        <div>
+                            <label style="color: #27ae60; font-size:11px;">+ Gelir Kategorisi:</label>
+                            <div class="kat-ekle-grup">
+                                <input type="text" id="yeniGelirKatInput" placeholder="Kira">
+                                <button class="btn-gri" style="background: #27ae60;" onclick="kategoriEklemeSihirbazi('gelir')">Ekle</button>
+                            </div>
+                            <div class="kat-liste-kutusu" id="yonetimGelirListesi"></div>
+                        </div>
+                        <div>
+                            <label style="color: #c0392b; font-size:11px;">- Gider Kategorisi:</label>
+                            <div class="kat-ekle-grup">
+                                <input type="text" id="yeniGiderKatInput" placeholder="Sağlık">
+                                <button class="btn-gri" style="background: #c0392b;" onclick="kategoriEklemeSihirbazi('gider')">Ekle</button>
+                            </div>
+                            <div class="kat-liste-kutusu" id="yonetimGiderListesi"></div>
+                        </div>
+                        <div>
+                            <label style="color: #b7950b; font-size:11px;">🪙 Altın Alt Türleri:</label>
+                            <div class="kat-ekle-grup">
+                                <input type="text" id="yeniAltinKatInput" placeholder="Örn: Ata Altın">
+                                <button class="btn-gri" style="background: #b7950b;" onclick="kategoriEklemeSihirbazi('altin')">Ekle</button>
+                            </div>
+                            <div class="kat-liste-kutusu" id="yonetimAltinListesi"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- AY SEÇİMİ VE YEDEKLEME -->
+        <div class="ay-secici-alani">
+            <div class="ay-secici-sol">
+                <label>Çalıştığınız Ay:</label>
+                <select id="aySecimi" onchange="ayDegistir()">
+                    <option value="2026-05">Mayıs 2026</option>
+                    <option value="2026-06">Haziran 2026</option>
+                    <option value="2026-07">Temmuz 2026</option>
+                    <option value="2026-08">Ağustos 2026</option>
+                    <option value="2026-09">Eylül 2026</option>
+                    <option value="2026-10">Ekim 2026</option>
+                    <option value="2026-11">Kasım 2026</option>
+                    <option value="2026-12">Aralık 2026</option>
+                </select>
+                <button class="btn-mavi" onclick="raporuAc()">📊 Yıllık Özet Raporu</button>
+            </div>
+
+            <!-- GÜVENLİK VE YEDEKLEME ALANI -->
+            <div class="yedekleme-alani">
+                <button class="btn-turuncu" onclick="verileriDisariAktar()">💾 Verileri Bilgisayara Yedekle</button>
+                <button class="btn-mor" onclick="document.getElementById('yedekDosyaSecici').click()">📂 Yedekten Geri Yükle</button>
+                <input type="file" id="yedekDosyaSecici" style="display: none;" accept=".json" onchange="verileriIceriAktar(event)">
+                <button class="btn-gri" onclick="seciliAyiSifirla()">Bu Ayı Sıfırla</button>
+            </div>
+        </div>
+        
+        <!-- ÜST ÖZET PANELİ -->
+        <div class="ozet-kartlari">
+            <div class="kart kart-gelir">Toplam Gelir<br><span id="ozetGelir">0</span> TL</div>
+            <div class="kart kart-gider">Toplam Gider<br><span id="ozetGider">0</span> TL</div>
+            <div class="kart kart-kalan" id="kalanKart">Net Birikim (TL)<br><span id="ozetKalan">0</span> TL</div>
+            <div class="kart kart-birikim">Toplam Yatırım Maliyeti<br><span id="ozetYatirimMaliyet">0</span> TL</div>
+        </div>
+
+        <!-- DİNAMİK KATEGORİ ÖZETLERİ -->
+        <div class="kategori-panelleri">
+            <div class="kategori-ozet">
+                <div class="ozet-baslik yesil">💰 Gelir Dağılımı</div>
+                <div id="dinamikGelirOzet"></div>
+            </div>
+            <div class="kategori-ozet">
+                <div class="ozet-baslik kirmizi">📉 Gider Dağılımı</div>
+                <div id="dinamikGiderOzet"></div>
+            </div>
+            <div class="kategori-ozet">
+                <div class="ozet-baslik altin">🪙 Toplam Mevcut Varlık (Stok)</div>
+                <div id="dinamikBirikimOzet"></div>
+            </div>
+        </div>
+
+        <!-- ÜÇ SÜTUNLU GİRİŞ ALANI -->
+        <div class="izgara">
+            <!-- 1. SÜTUN: GELİR -->
+            <div>
+                <div class="form-grubu form-grubu-gelir">
+                    <span class="baslik-gelir">Gelir Ekle</span>
+                    <label>Tarih:</label>
+                    <input type="date" id="gelirTarih">
+                    <label>Gelir Kategorisi:</label>
+                    <select id="gelirKategori"></select>
+                    <label>Gelir Açıklaması:</label>
+                    <input type="text" id="gelirAdi" placeholder="Örn: Maaş, Kira Geliri">
+                    <label>Tutar (TL):</label>
+                    <input type="number" id="gelirTutari" placeholder="Kaç TL?">
+                    <button class="btn-yesil" onclick="gelirEkle()">Geliri İşle</button>
+                </div>
+                <h3>Gelir Detayları</h3>
+                <table>
+                    <thead><tr><th>Tarih</th><th>Kategori</th><th>Açıklama</th><th>Tutar</th><th></th></tr></thead>
+                    <tbody id="gelirTablosu"></tbody>
+                </table>
+            </div>
+            
+            <!-- 2. SÜTUN: GIDER -->
+            <div>
+                <div class="form-grubu form-grubu-gider">
+                    <span class="baslik-gider">Gider Ekle</span>
+                    <label>Tarih:</label>
+                    <input type="date" id="giderTarih">
+                    <label>Gider Kategorisi:</label>
+                    <select id="giderKategori"></select>
+                    <label>Gider Açıklaması:</label>
+                    <input type="text" id="giderAdi" placeholder="Örn: Market, Fatura">
+                    <label>Tutar (TL):</label>
+                    <input type="number" id="giderTutari" placeholder="Kaç TL?">
+                    <button class="btn-kirmizi" onclick="giderEkle()">Gideri İşle</button>
+                </div>
+                <h3>Gider Detayları</h3>
+                <table>
+                    <thead><tr><th>Tarih</th><th>Kategori</th><th>Açıklama</th><th>Tutar</th><th></th></tr></thead>
+                    <tbody id="giderTablosu"></tbody>
+                </table>
+            </div>
+
+            <!-- 3. SÜTUN: BİRİKİM GİRİŞİ -->
+            <div>
+                <div class="form-grubu form-grubu-birikim">
+                    <span class="baslik-birikim">Yatırım / Eski Birikim Ekle</span>
+                    
+                    <div class="onay-kutusu-alani">
+                        <input type="checkbox" id="eskiBirikimCheck" onchange="tarihKilitDurumuGuncelle()">
+                        <label for="eskiBirikimCheck">⏳ Eski Birikim (Tarih Bilinmiyor)</label>
+                    </div>
+
+                    <label id="tarihEtiket">Tarih:</label>
+                    <input type="date" id="birikimTarih">
+
+                    <label>Varlık Türü:</label>
+                    <select id="birikimTuru" onchange="birikimTuruDegisti()">
+                        <option value="Altın">🪙 Altın</option>
+                        <option value="Dolar ($)">💵 Dolar ($)</option>
+                        <option value="Euro (€)">💶 Euro (€)</option>
+                        <option value="Diğer Yatırım">📈 Diğer (Hisse vb.)</option>
+                    </select>
+                    
+                    <!-- DİNAMİK ALTIN SEÇİMİ -->
+                    <div id="altinAltKategoriAlani">
+                        <label style="color:#b7950b;">Altın Türü Seçin:</label>
+                        <select id="birikimAltinAltTuru"></select>
+                    </div>
+
+                    <label id="miktarEtiket">Miktar (Adet/Gram):</label>
+                    <input type="number" id="birikimMiktar" step="0.01" placeholder="Örn: 5 veya 1.5">
+                    
+                    <label>Toplam TL Maliyeti:</label>
+                    <input type="number" id="birikimTlTutar" placeholder="Maliyet bilinmiyorsa tahmini yazın">
+                    <button class="btn-sari" onclick="birikimEkle()">Birikimi İşle</button>
+                </div>
+                <h3>Birikim Detayları</h3>
+                <table>
+                    <thead><tr><th>Tarih</th><th>Tür</th><th>Miktar</th><th>TL Maliyet</th><th></th></tr></thead>
+                    <tbody id="birikimTablosu"></tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- RAPOR MODAL -->
+    <div class="rapor-arkaplan" id="raporModal" onclick="raporuKapat()">
+        <div class="rapor-pencere" onclick="event.stopPropagation()">
+            <div class="rapor-ust">
+                <h2 style="color:#2c3e50;">📊 Yıllık Özet ve Kıyaslama Raporu (2026)</h2>
+                <button class="rapor-kapat" onclick="raporuKapat()">✕</button>
+            </div>
+            
+            <div class="ozet-kartlari" style="margin-bottom: 20px;">
+                <div class="kart" style="background:#d1f2eb; color:#117a65;">Yıllık Toplam Gelir<br><span id="yilGelir">0</span> TL</div>
+                <div class="kart" style="background:#fadbd8; color:#78281f;">Yıllık Toplam Gider<br><span id="yilGider">0</span> TL</div>
+                <div class="kart" style="background:#d6eaf8; color:#1f618d;">Yıllık Net Birikim<br><span id="yilKalan">0</span> TL</div>
+                <div class="kart" style="background:#fcf3cf; color:#7d6608; border:1px solid #f4d03f;">Yıllık Toplam Yatırım<br><span id="yilYatirim">0</span> TL</div>
+            </div>
+
+            <h3 style="margin-top:20px; margin-bottom:10px;">Ay Ay Durum Analizi</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Ay</th>
+                        <th>Toplam Gelir</th>
+                        <th>Toplam Gider (Yatırım Dahil)</th>
+                        <th>Net Birikim (TL)</th>
+                        <th>Yatırım Maliyeti</th>
+                    </tr>
+                </thead>
+                <tbody id="raporTabloGövde"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        let butceVeritabani = JSON.parse(localStorage.getItem("butceVeritabani")) || {};
+        
+        let varsayilanGelirKat = ["Maaş", "Ek Mesai", "Diğer Gelir"];
+        let varsayilanGiderKat = ["Kredi Kartı", "Fatura", "Kira", "Mutfak", "Diğer Gider"];
+        let varsayilanAltinKat = ["24k Gram", "22k Gram", "Çeyrek Altın", "Yarım Altın", "Tam Altın"];
+        
+        let dinamikKategoriler = JSON.parse(localStorage.getItem("dinamikKategoriler")) || {};
+        
+        if(!dinamikKategoriler.gelir) dinamikKategoriler.gelir = varsayilanGelirKat;
+        if(!dinamikKategoriler.gider) dinamikKategoriler.gider = varsayilanGiderKat;
+        dinamikKategoriler.altin = varsayilanAltinKat; 
+        localStorage.setItem("dinamikKategoriler", JSON.stringify(dinamikKategoriler));
+
+        let aktifAy = "2026-05";
+
+        window.onload = function() {
+            tarihleriGuncelle();
+            ayVerisiniYukle();
+            birikimTuruDegisti();
+        };
+
+        function tarihleriGuncelle() {
+            const bugün = new Date().toISOString().split('T')[0];
+            document.getElementById("gelirTarih").value = bugün;
+            document.getElementById("giderTarih").value = bugün;
+            if(!document.getElementById("eskiBirikimCheck").checked) {
+                document.getElementById("birikimTarih").value = bugün;
+            }
+        }
+
+        function tarihKilitDurumuGuncelle() {
+            let kontrol = document.getElementById("eskiBirikimCheck").checked;
+            let tarihInput = document.getElementById("birikimTarih");
+            if(kontrol) {
+                tarihInput.disabled = true;
+                tarihInput.style.backgroundColor = "#e2e8f0";
+                tarihInput.value = aktifAy + "-01"; 
+            } else {
+                tarihInput.disabled = false;
+                tarihInput.style.backgroundColor = "";
+                tarihleriGuncelle();
+            }
+        }
+
+        /* YEDEKLERİ DOSYA OLARAK BİLGİSAYARA İNDİRME */
+        function verileriDisariAktar() {
+            let herSey = {
+                butceVeritabani: butceVeritabani,
+                dinamikKategoriler: dinamikKategoriler
+            };
+            let veriStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(herSey));
+            let indirmeButonu = document.createElement('a');
+            
+            let tarihEtiket = new Date().toISOString().split('T')[0];
+            indirmeButonu.setAttribute("href", veriStr);
+            indirmeButonu.setAttribute("download", `butce_yedek_${tarihEtiket}.json`);
+            document.body.appendChild(indirmeButonu);
+            indirmeButonu.click();
+            indirmeButonu.remove();
+        }
+
+        /* YEDEK DOSYASINI ALIP SİSTEME YÜKLEME */
+        function verileriIceriAktar(event) {
+            let dosya = event.target.files[0];
+            if (!dosya) return;
+
+            let okuyucu = new FileReader();
+            okuyucu.onload = function(e) {
+                try {
+                    let yuklenenVeri = JSON.parse(e.target.result);
+                    if (yuklenenVeri.butceVeritabani && yuklenenVeri.dinamikKategoriler) {
+                        if(confirm("Bu yedek dosyasını yüklerseniz, şu anki mevcut verileriniz silinecektir. Devam edilsin mi?")) {
+                            butceVeritabani = yuklenenVeri.butceVeritabani;
+                            dinamikKategoriler = yuklenenVeri.dinamikKategoriler;
+                            
+                            localStorage.setItem("butceVeritabani", JSON.stringify(butceVeritabani));
+                            localStorage.setItem("dinamikKategoriler", JSON.stringify(dinamikKategoriler));
+                            
+                            ayVerisiniYukle();
+                            alert("Yedek başarıyla geri yüklendi!");
+                        }
+                    } else {
+                        alert("Geçersiz yedek dosyası formatı.");
+                    }
+                } catch (err) {
+                    alert("Dosya okunurken bir hata oluştu.");
+                }
+            };
+            okuyucu.readAsText(dosya);
+            event.target.value = ""; // Aynı dosyayı tekrar seçebilmek için temizle
+        }
+
+        function ayarlariAcKapat(event) {
+            event.stopPropagation();
+            let balon = document.getElementById("ayarlarBalonu");
+            balon.classList.toggle("aktif");
+        }
+
+        document.addEventListener("click", function(event) {
+            let balon = document.getElementById("ayarlarBalonu");
+            let kapsayici = document.getElementById("ayarlarKapsayici");
+            if (kapsayici && !kapsayici.contains(event.target)) {
+                balon.classList.remove("aktif");
+            }
+        });
+
+        function ayDegistir() {
+            aktifAy = document.getElementById("aySecimi").value;
+            document.getElementById("eskiBirikimCheck").checked = false;
+            tarihKilitDurumuGuncelle();
+            ayVerisiniYukle();
+        }
+
+        function ayVerisiniYukle() {
+            if (!butceVeritabani[aktifAy]) {
+                butceVeritabani[aktifAy] = { gelirler: [], harcamalar: [], birikimler: [] };
+            }
+            ekraniGuncelle();
+        }
+
+        function birikimTuruDegisti() {
+            let tur = document.getElementById("birikimTuru").value;
+            let altAlan = document.getElementById("altinAltKategoriAlani");
+            let etiket = document.getElementById("miktarEtiket");
+            
+            if (tur === "Altın") {
+                altAlan.style.display = "block";
+                etiket.innerText = "Alınan Miktar (Adet/Gram):";
+            } else {
+                altAlan.style.display = "none";
+                etiket.innerText = tur.includes("Dolar") || tur.includes("Euro") ? "Alınan Tutar (Döviz Miktarı):" : "Miktar (Adet):";
+            }
+        }
+
+        function kategoriEklemeSihirbazi(tur) {
+            let inputId = tur === 'gelir' ? "yeniGelirKatInput" : (tur === 'gider' ? "yeniGiderKatInput" : "yeniAltinKatInput");
+            let yeniKat = document.getElementById(inputId).value.trim();
+            if (yeniKat === "") return;
+            if (dinamikKategoriler[tur].includes(yeniKat)) return;
+            
+            dinamikKategoriler[tur].push(yeniKat);
+            localStorage.setItem("dinamikKategoriler", JSON.stringify(dinamikKategoriler));
+            document.getElementById(inputId).value = "";
+            ekraniGuncelle();
+        }
+
+        function kategoriSil(tur, katAdi) {
+            if (confirm(`"${katAdi}" silinsin mi?`)) {
+                dinamikKategoriler[tur] = dinamikKategoriler[tur].filter(item => item !== katAdi);
+                localStorage.setItem("dinamikKategoriler", JSON.stringify(dinamikKategoriler));
+                ekraniGuncelle();
+            }
+        }
+
+        function formatTarih(tarihStr, eskisiniIsaretle) {
+            if(eskisiniIsaretle) return "⏳ Eski Birikim";
+            if(!tarihStr) return "";
+            return tarihStr.split('-').reverse().join('.');
+        }
+
+        function gelirEkle() {
+            let kat = document.getElementById("gelirKategori").value;
+            let ad = document.getElementById("gelirAdi").value.trim();
+            let tutar = Number(document.getElementById("gelirTutari").value);
+            let tarih = document.getElementById("gelirTarih").value;
+            if (!kat || ad === "" || tutar <= 0 || !tarih) return;
+            
+            butceVeritabani[aktifAy].gelirler.push({ kategori: kat, isim: ad, miktar: tutar, tarih: tarih });
+            butceVeritabani[aktifAy].gelirler.sort((a,b) => new Date(b.tarih) - new Date(a.tarih));
+            hafizayaKaydet();
+        }
+
+        function giderEkle() {
+            let kat = document.getElementById("giderKategori").value;
+            let ad = document.getElementById("giderAdi").value.trim();
+            let tutar = Number(document.getElementById("giderTutari").value);
+            let tarih = document.getElementById("giderTarih").value;
+            if (!kat || ad === "" || tutar <= 0 || !tarih) return;
+            
+            butceVeritabani[aktifAy].harcamalar.push({ kategori: kat, isim: ad, miktar: tutar, tarih: tarih });
+            butceVeritabani[aktifAy].harcamalar.sort((a,b) => new Date(b.tarih) - new Date(a.tarih));
+            hafizayaKaydet();
+        }
+
+        function birikimEkle() {
+            let anaTur = document.getElementById("birikimTuru").value;
+            let altTur = document.getElementById("birikimAltinAltTuru").value;
+            let tamTurAdi = anaTur === "Altın" ? altTur : anaTur;
+            
+            let miktar = Number(document.getElementById("birikimMiktar").value);
+            let tlTutar = Number(document.getElementById("birikimTlTutar").value);
+            let tarih = document.getElementById("birikimTarih").value;
+            let isEski = document.getElementById("eskiBirikimCheck").checked;
+
+            if (miktar <= 0 || tlTutar <= 0 || !tarih) { alert("Lütfen alanları tam doldurun."); return; }
+            
+            butceVeritabani[aktifAy].birikimler.push({ 
+                tur: tamTurAdi, 
+                miktar: miktar, 
+                tlTutar: tlTutar, 
+                tarih: tarih, 
+                isAltin: (anaTur === "Altın"),
+                isEski: isEski 
+            });
+            butceVeritabani[aktifAy].birikimler.sort((a,b) => new Date(b.tarih) - new Date(a.tarih));
+            hafizayaKaydet();
+        }
+
+        function veriSil(tur, indeks) {
+            butceVeritabani[aktifAy][tur].splice(indeks, 1);
+            hafizayaKaydet();
+        }
+
+        function hafizayaKaydet() {
+            localStorage.setItem("butceVeritabani", JSON.stringify(butceVeritabani));
+            document.getElementById("gelirAdi").value = "";
+            document.getElementById("gelirTutari").value = "";
+            document.getElementById("giderAdi").value = "";
+            document.getElementById("giderTutari").value = "";
+            document.getElementById("birikimMiktar").value = "";
+            document.getElementById("birikimTlTutar").value = "";
+            document.getElementById("eskiBirikimCheck").checked = false;
+            tarihKilitDurumuGuncelle();
+            tarihleriGuncelle();
+            ekraniGuncelle();
+        }
+
+        function ekraniGuncelle() {
+            let gSelect = document.getElementById("gelirKategori");
+            let hSelect = document.getElementById("giderKategori");
+            let aSelect = document.getElementById("birikimAltinAltTuru");
+            if(gSelect) gSelect.innerHTML = ""; 
+            if(hSelect) hSelect.innerHTML = "";
+            if(aSelect) aSelect.innerHTML = "";
+            
+            dinamikKategoriler.gelir.forEach(k => { gSelect.innerHTML += `<option value="${k}">${k}</option>` });
+            dinamikKategoriler.gider.forEach(k => { hSelect.innerHTML += `<option value="${k}">${k}</option>` });
+            dinamikKategoriler.altin.forEach(k => { aSelect.innerHTML += `<option value="${k}">🪙 ${k}</option>` });
+
+            let yonetimGelirDiv = document.getElementById("yonetimGelirListesi");
+            let yonetimGiderDiv = document.getElementById("yonetimGiderListesi");
+            let yonetimAltinDiv = document.getElementById("yonetimAltinListesi");
+            if(yonetimGelirDiv) yonetimGelirDiv.innerHTML = ""; 
+            if(yonetimGiderDiv) yonetimGiderDiv.innerHTML = "";
+            if(yonetimAltinDiv) yonetimAltinDiv.innerHTML = "";
+            
+            dinamikKategoriler.gelir.forEach(k => { yonetimGelirDiv.innerHTML += `<div class="kat-satir"><span>• ${k}</span> <button class="btn-sil" onclick="kategoriSil('gelir','${k}')">✕</button></div>` });
+            dinamikKategoriler.gider.forEach(k => { yonetimGiderDiv.innerHTML += `<div class="kat-satir"><span>• ${k}</span> <button class="btn-sil" onclick="kategoriSil('gider','${k}')">✕</button></div>` });
+            dinamikKategoriler.altin.forEach(k => { yonetimAltinDiv.innerHTML += `<div class="kat-satir"><span>• ${k}</span> <button class="btn-sil" onclick="kategoriSil('altin','${k}')">✕</button></div>` });
+
+            let toplamGelir = 0;
+            let toplamGider = 0;
+            let toplamYatirimMaliyeti = 0;
+
+            let gelirKatToplamlari = {};
+            let giderKatToplamlari = {};
+            let birikimKatToplamlari = { "Dolar ($)": 0, "Euro (€)": 0, "Diğer Yatırım": 0 };
+            
+            dinamikKategoriler.altin.forEach(k => birikimKatToplamlari[k] = 0);
+            dinamikKategoriler.gelir.forEach(k => gelirKatToplamlari[k] = 0);
+            dinamikKategoriler.gider.forEach(k => giderKatToplamlari[k] = 0);
+
+            let gelirGövde = document.getElementById("gelirTablosu");
+            let giderGövde = document.getElementById("giderTablosu");
+            let birikimGövde = document.getElementById("birikimTablosu");
+            if(gelirGövde) gelirGövde.innerHTML = ""; 
+            if(giderGövde) giderGövde.innerHTML = ""; 
+            if(birikimGövde) birikimGövde.innerHTML = "";
+
+            let ayinGelirleri = butceVeritabani[aktifAy].gelirler || [];
+            for (let i = 0; i < ayinGelirleri.length; i++) {
+                let g = ayinGelirleri[i];
+                toplamGelir += g.miktar;
+                if (gelirKatToplamlari[g.kategori] !== undefined) gelirKatToplamlari[g.kategori] += g.miktar;
+                gelirGövde.innerHTML += `<tr><td>${formatTarih(g.tarih)}</td><td>${g.kategori}</td><td>${g.isim}</td><td class="gelir-tutar">+${g.miktar} TL</td><td><button class="btn-sil" onclick="veriSil('gelirler', ${i})">✕</button></td></tr>`;
+            }
+
+            let ayinHarcamalari = butceVeritabani[aktifAy].harcamalar || [];
+            for (let i = 0; i < ayinHarcamalari.length; i++) {
+                let h = ayinHarcamalari[i];
+                toplamGider += h.miktar;
+                if (giderKatToplamlari[h.kategori] !== undefined) giderKatToplamlari[h.kategori] += h.miktar;
+                giderGövde.innerHTML += `<tr><td>${formatTarih(h.tarih)}</td><td>${h.kategori}</td><td>${h.isim}</td><td class="gider-tutar">-${h.miktar} TL</td><td><button class="btn-sil" onclick="veriSil('harcamalar', ${i})">✕</button></td></tr>`;
+            }
+
+            // KÜMÜLATİF STOK TOPLAMA
+            for (let ayKey in butceVeritabani) {
+                let ayBList = butceVeritabani[ayKey].birikimler || [];
+                ayBList.forEach(b => {
+                    if (birikimKatToplamlari[b.tur] !== undefined) {
+                        birikimKatToplamlari[b.tur] += b.miktar;
+                    } else {
+                        birikimKatToplamlari[b.tur] = b.miktar;
+                    }
+                });
+            }
+
+            let ayinBirikimleri = butceVeritabani[aktifAy].birikimler || [];
+            for (let i = 0; i < ayinBirikimleri.length; i++) {
+                let b = ayinBirikimleri[i];
+                toplamYatirimMaliyeti += b.tlTutar;
+                toplamGider += b.tlTutar;
+                birikimGövde.innerHTML += `<tr><td>${formatTarih(b.tarih, b.isEski)}</td><td class="kat-sutun">${b.tur}</td><td><b>${b.miktar}</b></td><td class="birikim-tutar">${b.tlTutar} TL</td><td><button class="btn-sil" onclick="veriSil('birikimler', ${i})">✕</button></td></tr>`;
+            }
+
+            let dinamikGelirOzetDiv = document.getElementById("dinamikGelirOzet");
+            let dinamikGiderOzetDiv = document.getElementById("dinamikGiderOzet");
+            let dinamikBirikimOzetDiv = document.getElementById("dinamikBirikimOzet");
+            if(dinamikGelirOzetDiv) dinamikGelirOzetDiv.innerHTML = ""; 
+            if(dinamikGiderOzetDiv) dinamikGiderOzetDiv.innerHTML = ""; 
+            if(dinamikBirikimOzetDiv) dinamikBirikimOzetDiv.innerHTML = "";
+
+            for (let k in gelirKatToplamlari) { dinamikGelirOzetDiv.innerHTML += `<div class="kat-satir"><span class="kat-etiket">${k}:</span> <span>${gelirKatToplamlari[k]} TL</span></div>` }
+            for (let k in giderKatToplamlari) { dinamikGiderOzetDiv.innerHTML += `<div class="kat-satir"><span class="kat-etiket">${k}:</span> <span>${giderKatToplamlari[k]} TL</span></div>` }
+            
+            for (let k in birikimKatToplamlari) {
+                if (birikimKatToplamlari[k] === 0 && !dinamikKategoriler.altin.includes(k)) continue;
+                let birim = "Adet";
+                if(k.toLowerCase().includes("gram")) birim = "Gr";
+                else if(k.includes("Dolar")) birim = "$";
+                else if(k.includes("Euro")) birim = "€";
+                
+                dinamikBirikimOzetDiv.innerHTML += `<div class="kat-satir"><span class="kat-etiket">${k}:</span> <span><b>${birikimKatToplamlari[k].toFixed(2).replace('.00','')}</b> ${birim}</span></div>`;
+            }
+
+            let kalanPara = toplamGelir - toplamGider;
+            document.getElementById("ozetGelir").innerText = toplamGelir;
+            document.getElementById("ozetGider").innerText = toplamGider;
+            document.getElementById("ozetKalan").innerText = kalanPara;
+            document.getElementById("ozetYatirimMaliyet").innerText = toplamYatirimMaliyeti;
+
+            let kalanKart = document.getElementById("kalanKart");
+            if (kalanPara < 0) {
+                kalanKart.style.backgroundColor = "#fdedec"; kalanKart.style.color = "#78281f";
+            } else {
+                kalanKart.style.backgroundColor = "#ebf5fb"; kalanKart.style.color = "#1f618d";
+            }
+        }
+
+        function seciliAyiSifirla() {
+            if (confirm("Bu ayın tüm kayıtları silinecek. Emin misiniz?")) {
+                butceVeritabani[aktifAy] = { gelirler: [], harcamalar: [], birikimler: [] };
+                localStorage.setItem("butceVeritabani", JSON.stringify(butceVeritabani));
+                ekraniGuncelle();
+            }
+        }
+
+        function raporuAc() {
+            let tabloboyutu = document.getElementById("raporTabloGövde");
+            tabloboyutu.innerHTML = "";
+
+            let yillikToplamGelir = 0;
+            let yillikToplamGider = 0;
+            let yillikToplamYatirim = 0;
+
+            let secenekler = document.getElementById("aySecimi").options;
+            let ayIsimleri = { "05": "Mayıs", "06": "Haziran", "07": "Temmuz", "08": "Ağustos", "09": "Eylül", "10": "Ekim", "11": "Kasım", "12": "Aralık" };
+
+            for (let i = 0; i < secenekler.length; i++) {
+                let ayKodu = secenekler[i].value; 
+                let ayParca = ayKodu.split("-")[1];
+                let gorunurAd = ayIsimleri[ayParca] + " " + ayKodu.split("-")[0];
+
+                let ayGelir = 0;
+                let ayGider = 0;
+                let ayYatirim = 0;
+
+                if (butceVeritabani[ayKodu]) {
+                    (butceVeritabani[ayKodu].gelirler || []).forEach(g => ayGelir += g.miktar);
+                    (butceVeritabani[ayKodu].harcamalar || []).forEach(h => ayGider += h.miktar);
+                    (butceVeritabani[ayKodu].birikimler || []).forEach(b => { ayYatirim += b.tlTutar; ayGider += b.tlTutar; });
+                }
+
+                yillikToplamGelir += ayGelir; yillikToplamGider += ayGider; yillikToplamYatirim += ayYatirim;
+                let ayKalan = ayGelir - ayGider;
+                let kalanRenk = ayKalan < 0 ? 'color:#c0392b; font-weight:bold;' : 'color:#27ae60; font-weight:bold;';
+
+                tabloboyutu.innerHTML += `
+                    <tr>
+                        <td><b>${gorunurAd}</b></td>
+                        <td style="color:#27ae60;">+${ayGelir} TL</td>
+                        <td style="color:#c0392b;">-${ayGider} TL</td>
+                        <td style="${kalanRenk}">${ayKalan} TL</td>
+                        <td style="color:#b7950b;">${ayYatirim} TL</td>
+                    </tr>
+                `;
+            }
+
+            document.getElementById("yilGelir").innerText = yillikToplamGelir;
+            document.getElementById("yilGider").innerText = yillikToplamGider;
+            document.getElementById("yilKalan").innerText = yillikToplamGelir - yillikToplamGider;
+            document.getElementById("yilYatirim").innerText = yillikToplamYatirim;
+            document.getElementById("raporModal").style.display = "flex";
+        }
+
+        function raporuKapat() { document.getElementById("raporModal").style.display = "none"; }
+    </script>
+</body>
+</html>
